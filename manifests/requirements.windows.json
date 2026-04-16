@@ -1,0 +1,13 @@
+﻿{
+  "os": "windows",
+  "requirements": [
+    "Git",
+    "Node.js",
+    "npm or pnpm",
+    "Docker Desktop",
+    "10 GB free disk space",
+    "Internet connection",
+    "Required ports available",
+    "Write access to working directory"
+  ]
+}
