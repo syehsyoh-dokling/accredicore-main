@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { X, Plus, Upload, FileText, Trash2 } from 'lucide-react';
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface AddPolicyModalProps {
   isOpen: boolean;
@@ -109,6 +110,7 @@ const programChapters = {
 
 export function AddPolicyModal({ isOpen, onClose, onPolicyCreated }: AddPolicyModalProps) {
   const { toast } = useToast();
+  const { userRole } = useAuth();
   const [formData, setFormData] = useState({
     title: '',
     titleEn: '',
@@ -127,6 +129,7 @@ export function AddPolicyModal({ isOpen, onClose, onPolicyCreated }: AddPolicyMo
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
   const [isDragging, setIsDragging] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const canManagePolicies = ['system_admin', 'super_user', 'admin'].includes(userRole || '');
 
   const accreditationTypes = [
     'CBAHI - Saudi Central Board For Accreditation Of Healthcare Institutions',
@@ -241,20 +244,65 @@ export function AddPolicyModal({ isOpen, onClose, onPolicyCreated }: AddPolicyMo
         return;
       }
 
-      // Prepare content from uploaded files (simplified - in real app you'd store file URLs)
-      let content = formData.description || '';
-      if (uploadedFiles.length > 0) {
-        content += '\n\nAttached Files:\n' + uploadedFiles.map(f => f.name).join('\n');
+      if (!canManagePolicies) {
+        toast({
+          title: "Access denied",
+          description: "Only elevated roles can create policies.",
+          variant: "destructive",
+        });
+        return;
       }
 
-      // Create policy object
+      const uploadedFileRecords: Array<{
+        file_path: string;
+        original_filename: string;
+        mime_type: string;
+        file_size: number;
+      }> = [];
+
+      for (const uploadedFile of uploadedFiles) {
+        const extension = uploadedFile.name.split('.').pop() || 'bin';
+        const storagePath = `policy-library/${Date.now()}-${uploadedFile.id}.${extension}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from('documents')
+          .upload(storagePath, uploadedFile.file, { upsert: false });
+
+        if (uploadError) {
+          throw new Error(`File upload failed for ${uploadedFile.name}: ${uploadError.message}`);
+        }
+
+        uploadedFileRecords.push({
+          file_path: storagePath,
+          original_filename: uploadedFile.name,
+          mime_type: uploadedFile.type || 'application/octet-stream',
+          file_size: uploadedFile.size,
+        });
+      }
+
+      let content = formData.description || '';
+      if (uploadedFileRecords.length > 0) {
+        content += '\n\nAttached Files:\n' + uploadedFileRecords.map(f => f.original_filename).join('\n');
+      }
+
+      const primaryFile = uploadedFileRecords[0];
+      const normalizedEnglishTitle = formData.titleEn.trim() || formData.title.trim();
+      const normalizedArabicTitle = formData.title.trim() || null;
+
       const policyData = {
-        title: formData.title || formData.titleEn,
+        title: normalizedEnglishTitle,
+        title_ar: normalizedArabicTitle,
         description: formData.description,
         content: content,
         category: formData.nationalProgram || formData.documentType || 'general',
+        chapter: formData.chapter || null,
+        document_type: formData.documentType || null,
         status: 'draft',
         created_by: user.id,
+        file_path: primaryFile?.file_path || null,
+        original_filename: primaryFile?.original_filename || null,
+        mime_type: primaryFile?.mime_type || null,
+        file_size: primaryFile?.file_size || null,
       };
 
       // Insert policy into database
@@ -267,17 +315,30 @@ export function AddPolicyModal({ isOpen, onClose, onPolicyCreated }: AddPolicyMo
         console.error('Error creating policy:', error);
         toast({
           title: "Error",
-          description: "Failed to create policy. Please try again.",
+          description: `Failed to create policy: ${error.message}`,
           variant: "destructive",
         });
         return;
       }
 
-      // If files were uploaded, you would upload them to storage here
-      // For now, we'll just log them
-      if (uploadedFiles.length > 0) {
-        console.log('Files to upload:', uploadedFiles);
-        // TODO: Upload files to Supabase storage
+      if (uploadedFileRecords.length > 0) {
+        const documentRows = uploadedFileRecords.map((file) => ({
+          title: normalizedEnglishTitle,
+          description: formData.description || 'Imported from Add Policy dialog',
+          file_path: file.file_path,
+          storage_bucket: 'documents',
+          original_filename: file.original_filename,
+          mime_type: file.mime_type,
+          category: formData.nationalProgram || formData.documentType || 'general',
+          tags: formData.complianceStandards,
+          file_size: file.file_size,
+          created_by: user.id,
+        }));
+
+        const { error: documentsError } = await supabase.from('documents').insert(documentRows);
+        if (documentsError) {
+          console.error('Error creating document rows:', documentsError);
+        }
       }
 
       toast({

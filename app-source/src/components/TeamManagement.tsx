@@ -11,7 +11,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { Users, Plus, Settings, UserPlus, Edit, Trash2, MoreVertical } from 'lucide-react';
+import { Users, Plus, Settings, UserPlus, Edit, Trash2, MoreVertical, Shield } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { useTeams } from '@/hooks/useTeams';
 
@@ -98,6 +98,24 @@ export const TeamManagement = () => {
       <div className="space-y-4">
         <div className="h-8 bg-gray-200 rounded animate-pulse"></div>
         <div className="h-32 bg-gray-200 rounded animate-pulse"></div>
+      </div>
+    );
+  }
+
+  if (!canManageTeams) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <Shield className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+          <h3 className="text-lg font-semibold text-muted-foreground">
+            {language === 'ar' ? 'ØºÙŠØ± Ù…ØµØ±Ø­ Ù„Ùƒ Ø¨Ø§Ù„ÙˆØµÙˆÙ„' : 'Access Denied'}
+          </h3>
+          <p className="text-sm text-muted-foreground">
+            {language === 'ar'
+              ? 'ÙŠØ¬Ø¨ Ø£Ù† ØªÙƒÙˆÙ† Ù…Ø¯ÙŠØ± Ù„Ù„ÙˆØµÙˆÙ„ Ù„Ù‡Ø°Ù‡ Ø§Ù„ØµÙØ­Ø©'
+              : 'You must be an admin to access this panel'}
+          </p>
+        </div>
       </div>
     );
   }

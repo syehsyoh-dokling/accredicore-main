@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { BarChart3, Download, FileText, TrendingUp, Calendar, Filter, Printer } from 'lucide-react';
@@ -16,6 +17,7 @@ export function ReportingCenter() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [selectedReport, setSelectedReport] = useState<any>(null);
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
+  const [newReportDialogOpen, setNewReportDialogOpen] = useState(false);
   const { toast } = useToast();
   const { t, language, dir } = useLanguage();
 
@@ -77,6 +79,7 @@ export function ReportingCenter() {
     // Simulate report generation
     setTimeout(() => {
       setIsGenerating(false);
+      setNewReportDialogOpen(false);
       toast({
         title: t('success'),
         description: language === 'ar' ? 
@@ -95,6 +98,10 @@ export function ReportingCenter() {
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
     }, 2000);
+  };
+
+  const handleOpenNewReport = () => {
+    setNewReportDialogOpen(true);
   };
 
   const handleViewReport = (report: any) => {
@@ -233,7 +240,10 @@ ${new Date().toLocaleDateString()}
             <Filter className="h-4 w-4" />
             {t('filter')}
           </Button>
-          <Button className={`gap-2 bg-blue-600 hover:bg-blue-700 ${language === 'ar' ? 'flex-row-reverse' : ''}`}>
+          <Button
+            className={`gap-2 bg-blue-600 hover:bg-blue-700 ${language === 'ar' ? 'flex-row-reverse' : ''}`}
+            onClick={handleOpenNewReport}
+          >
             <FileText className="h-4 w-4" />
             {t('newReport')}
           </Button>
@@ -411,6 +421,58 @@ ${new Date().toLocaleDateString()}
         onDownload={handleDownloadReport}
         onPrint={handlePrintReport}
       />
+
+      <Dialog open={newReportDialogOpen} onOpenChange={setNewReportDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>{t('newReport')}</DialogTitle>
+          </DialogHeader>
+
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+            <Select value={reportType} onValueChange={setReportType}>
+              <SelectTrigger>
+                <SelectValue placeholder={t('reportType')} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={t('complianceReport')}>{t('complianceReport')}</SelectItem>
+                <SelectItem value={t('controlsMatrix')}>{t('controlsMatrix')}</SelectItem>
+                <SelectItem value={t('policies')}>{t('policies')}</SelectItem>
+                <SelectItem value={t('audit')}>{t('audit')}</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select value={timePeriod} onValueChange={setTimePeriod}>
+              <SelectTrigger>
+                <SelectValue placeholder={t('timePeriod')} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={t('lastWeek')}>{t('lastWeek')}</SelectItem>
+                <SelectItem value={t('lastMonth')}>{t('lastMonth')}</SelectItem>
+                <SelectItem value={t('lastQuarter')}>{t('lastQuarter')}</SelectItem>
+                <SelectItem value={t('lastYear')}>{t('lastYear')}</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select value={format} onValueChange={setFormat}>
+              <SelectTrigger>
+                <SelectValue placeholder={t('format')} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="PDF">PDF</SelectItem>
+                <SelectItem value="Excel">Excel</SelectItem>
+                <SelectItem value="PowerPoint">PowerPoint</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="flex justify-end">
+            <Button onClick={handleGenerateReport} disabled={isGenerating}>
+              <Download className="mr-2 h-4 w-4" />
+              {isGenerating ? t('generating') : t('generateReport')}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -21,10 +21,11 @@ interface ScheduleAuditModalProps {
 
 export function ScheduleAuditModal({ onAuditCreated }: ScheduleAuditModalProps) {
   const { t, language, dir } = useLanguage();
-  const { user } = useAuth();
+  const { user, userRole } = useAuth();
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const canManageAudits = ['system_admin', 'super_user', 'admin'].includes(userRole || '');
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -53,6 +54,15 @@ export function ScheduleAuditModal({ onAuditCreated }: ScheduleAuditModalProps) 
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!canManageAudits) {
+      toast({
+        title: "Access denied",
+        description: "Only elevated roles can schedule audits.",
+        variant: "destructive"
+      });
+      return;
+    }
+
     if (!user || !formData.title || !formData.department || !formData.scheduled_date) {
       toast({
         title: "Error",
@@ -118,7 +128,10 @@ export function ScheduleAuditModal({ onAuditCreated }: ScheduleAuditModalProps) 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className={`gap-2 bg-blue-600 hover:bg-blue-700 ${language === 'ar' ? 'flex-row-reverse' : ''}`}>
+        <Button
+          className={`gap-2 bg-blue-600 hover:bg-blue-700 ${language === 'ar' ? 'flex-row-reverse' : ''}`}
+          disabled={!canManageAudits}
+        >
           <Plus className="h-4 w-4" />
           {t('scheduleNewAudit')}
         </Button>

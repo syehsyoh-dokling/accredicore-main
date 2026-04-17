@@ -139,9 +139,11 @@ export function AppSidebar({ activeModule, setActiveModule }: AppSidebarProps) {
     >
       <SidebarHeader className="border-b border-blue-100 p-4 md:p-6">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-r from-blue-600 to-teal-600 rounded-lg flex items-center justify-center flex-shrink-0">
-            <span className="text-white font-bold text-sm md:text-lg">A</span>
-          </div>
+          <img
+            src="/favicon.svg"
+            alt="Arab Compliance Hub"
+            className="w-8 h-8 md:w-10 md:h-10 flex-shrink-0"
+          />
           <div className={`${language === 'ar' ? 'text-right' : 'text-left'} min-w-0 group-data-[collapsible=icon]:hidden`}>
             <h2 className="font-bold text-gray-900 dark:text-gray-100 text-sm md:text-base truncate">
               {language === 'ar' ? 'نواة الامتثال' : 'Arab Compliance Hub'}

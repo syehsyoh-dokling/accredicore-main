@@ -24,6 +24,7 @@ import { TaskManagement } from "@/components/TaskManagement";
 import { IncidentReporting } from "@/components/IncidentReporting";
 import { FileUploadManager } from "@/components/FileUploadManager";
 import { ProjectQualityPlan } from "@/components/ProjectQualityPlan";
+import { NotificationCenter } from "@/components/NotificationCenter";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Globe, Moon, Sun, LogOut } from 'lucide-react';
@@ -41,9 +42,17 @@ const HeaderControls = () => {
     <div className="flex items-center justify-between p-4 border-b bg-white dark:bg-gray-800">
       <div className="flex items-center gap-2">
         <SidebarTrigger className="md:hidden" />
+        <img
+          src="/favicon.svg"
+          alt="Arab Compliance Hub"
+          className="h-8 w-8 rounded-sm"
+        />
+        <div className="min-w-0">
         <h1 className="text-lg md:text-xl font-semibold text-gray-900 dark:text-gray-100 truncate">
           {language === 'ar' ? 'نواة الامتثال' : 'Arab Compliance Hub'}
         </h1>
+        <p className="text-xs text-muted-foreground">Version 0.1.0</p>
+        </div>
       </div>
       
       <div className="flex items-center gap-2">
@@ -70,6 +79,8 @@ const HeaderControls = () => {
             {theme === 'light' ? t('darkMode') || 'Dark' : t('lightMode') || 'Light'}
           </span>
         </Button>
+
+        <NotificationCenter />
 
         <Button
           variant="outline"

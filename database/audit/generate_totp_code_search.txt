@@ -1,0 +1,10 @@
+﻿=== SEARCH FOR generate_totp_code ===
+Generated: 04/17/2026 06:21:34
+
+--- MIGRATIONS ---
+C:\Users\Saifuddin\accredicore-main\app-source\supabase\migrations\20250808095314_e0735a1b-5ef3-42ee-bd8e-99b21521975b.sql
+C:\Users\Saifuddin\accredicore-main\app-source\supabase\migrations\20250808095431_8a069d67-2620-4d48-961a-f5d4b04afec7.sql
+C:\Users\Saifuddin\accredicore-main\app-source\supabase\migrations\20250808100259_d3f4ce56-3b83-47bc-93fb-35d672a71d1c.sql
+C:\Users\Saifuddin\accredicore-main\app-source\supabase\migrations\20251227201353_3e3d04f4-884b-40ed-8cc8-26137a357a71.sql
+
+--- SOURCE CODE ---

@@ -1,0 +1,16 @@
+﻿=== SEARCH RESULTS FOR DEPENDENCY OBJECTS ===
+Generated: 04/17/2026 05:52:09
+
+
+--- SEARCH: CREATE TYPE public.app_role ---
+C:\Users\Saifuddin\accredicore-main\app-source\supabase\migrations\20250623135003-92677312-1e53-42dd-b4be-bca1f2d72629.sql
+C:\Users\Saifuddin\accredicore-main\app-source\supabase\migrations\20250709214513-6c2d60e1-1c65-46d6-a2f7-f59b698cdd7f.sql
+C:\Users\Saifuddin\accredicore-main\app-source\supabase\migrations\20250709214755-bcf0260b-3146-4f59-b046-1f1d7f97e8e6.sql
+
+--- SEARCH: CREATE TABLE public.teams ---
+C:\Users\Saifuddin\accredicore-main\app-source\supabase\migrations\20250915025130_979f3813-b494-46d3-84ec-66e4c2193e44.sql
+C:\Users\Saifuddin\accredicore-main\app-source\supabase\migrations\20250915025211_1cd0fdf5-cb39-423e-98ca-0b78a98af23d.sql
+
+--- SEARCH: CREATE SCHEMA auth ---
+
+--- SEARCH: CREATE TABLE auth.users ---

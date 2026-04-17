@@ -60,18 +60,19 @@ serve(async (req) => {
       );
     }
 
-    const callerRole = callerRoles?.[0]?.role;
     const allowedRoles = ['admin', 'super_user', 'system_admin'];
-    
-    if (!callerRole || !allowedRoles.includes(callerRole)) {
-      console.error('Caller does not have admin permissions:', callerRole);
+
+    const hasAdminRole = callerRoles?.some(({ role }) => allowedRoles.includes(role));
+
+    if (!hasAdminRole) {
+      console.error('Caller does not have admin permissions:', callerRoles);
       return new Response(
         JSON.stringify({ error: 'Insufficient permissions. Only admins can update user passwords.' }),
         { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    console.log('Caller has admin role:', callerRole);
+    console.log('Caller has admin role:', callerRoles?.map(({ role }) => role));
 
     // Parse request body
     const { userId, newPassword } = await req.json();

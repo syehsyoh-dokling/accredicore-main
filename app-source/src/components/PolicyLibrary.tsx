@@ -12,6 +12,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AddPolicyModal } from "@/components/AddPolicyModal";
 import { FileUploadManager } from "@/components/FileUploadManager";
 import { BulkPolicyUpload } from "@/components/BulkPolicyUpload";
+import { PolicyGovernanceDialog } from "@/components/PolicyGovernanceDialog";
+import { PolicyAttestationDialog } from "@/components/PolicyAttestationDialog";
+import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useToast } from "@/hooks/use-toast";
 import { usePolicyTemplates } from "@/hooks/usePolicyTemplates";
@@ -30,6 +33,33 @@ interface EditingPolicy {
   category: string;
 }
 
+const hasReadableTitle = (value?: string | null) => {
+  if (!value) return false;
+  const trimmed = value.trim();
+  if (!trimmed) return false;
+  if (/^\?+[\s\d_-]*$/.test(trimmed)) return false;
+  return !trimmed.includes('????');
+};
+
+const getReadableResourceTitle = (
+  resource: {
+    id: string;
+    title?: string | null;
+    title_ar?: string | null;
+    description?: string | null;
+  },
+  language: string
+) => {
+  const preferredTitle = language === 'ar' ? resource.title_ar : resource.title;
+  const secondaryTitle = language === 'ar' ? resource.title : resource.title_ar;
+
+  if (hasReadableTitle(preferredTitle)) return preferredTitle!.trim();
+  if (hasReadableTitle(secondaryTitle)) return secondaryTitle!.trim();
+  if (resource.description?.trim()) return resource.description.trim();
+
+  return `Policy ${resource.id.slice(0, 8)}`;
+};
+
 export function PolicyLibrary() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -45,10 +75,14 @@ export function PolicyLibrary() {
   const [isAssignmentModalOpen, setIsAssignmentModalOpen] = useState(false);
   const [documentToAssign, setDocumentToAssign] = useState<any>(null);
   const [isBulkUploadOpen, setIsBulkUploadOpen] = useState(false);
+  const [governancePolicy, setGovernancePolicy] = useState<any | null>(null);
+  const [attestationPolicy, setAttestationPolicy] = useState<any | null>(null);
 
   const { t, language, dir } = useLanguage();
   const { toast } = useToast();
+  const { userRole } = useAuth();
   const { templates } = usePolicyTemplates();
+  const canManagePolicies = ['system_admin', 'super_user', 'admin'].includes(userRole || '');
 
   // Comprehensive category list including resources, chapters, and departments
   const allCategories = [
@@ -169,14 +203,14 @@ export function PolicyLibrary() {
     const policies = storedPolicies.map(policy => ({
       ...policy,
       type: 'policy',
-      displayTitle: language === 'ar' && policy.title_ar ? policy.title_ar : policy.title,
+      displayTitle: getReadableResourceTitle(policy, language),
       searchableContent: `${policy.title} ${policy.title_ar || ''} ${policy.description || ''} ${policy.content || ''} ${policy.category}`
     }));
 
     const templates = policyTemplates.map(template => ({
       ...template,
       type: 'template',
-      displayTitle: language === 'ar' && template.title_ar ? template.title_ar : template.title,
+      displayTitle: getReadableResourceTitle(template, language),
       searchableContent: `${template.title} ${template.title_ar || ''} ${template.description || ''} ${template.content || ''} ${template.category}`
     }));
 
@@ -200,6 +234,15 @@ export function PolicyLibrary() {
   }, [allResources, searchQuery, selectedCategory, selectedStatus]);
 
   const handleEditPolicy = (resource: any) => {
+    if (!canManagePolicies) {
+      toast({
+        title: language === 'ar' ? 'غير مسموح' : 'Access denied',
+        description: language === 'ar' ? 'يمكنك عرض السياسات فقط.' : 'Staff can view policies, but cannot edit them.',
+        variant: 'destructive'
+      });
+      return;
+    }
+
     setEditingPolicy({
       id: resource.id,
       title: resource.title,
@@ -214,6 +257,15 @@ export function PolicyLibrary() {
 
   const saveEditedPolicy = async () => {
     if (!editingPolicy) return;
+
+    if (!canManagePolicies) {
+      toast({
+        title: language === 'ar' ? 'غير مسموح' : 'Access denied',
+        description: language === 'ar' ? 'لا تملك صلاحية تعديل السياسات.' : 'You do not have permission to edit policies.',
+        variant: 'destructive'
+      });
+      return;
+    }
 
     try {
       const table = editingPolicy.id.startsWith('POL-') ? 'policies' : 'policy_templates';
@@ -473,17 +525,27 @@ ${policy.title} (${policy.titleEn})
   };
 
   const handleAssignDocument = (resource: any) => {
+    if (!canManagePolicies) {
+      toast({
+        title: language === 'ar' ? 'غير مسموح' : 'Access denied',
+        description: language === 'ar' ? 'تعيين السياسات متاح فقط للمشرفين.' : 'Only elevated roles can assign policies.',
+        variant: 'destructive'
+      });
+      return;
+    }
+
     setDocumentToAssign(resource);
     setIsAssignmentModalOpen(true);
   };
 
   const handleExportDocument = (resource: any) => {
-    const fileName = `${resource.title.replace(/\s+/g, '_')}_${new Date().getTime()}`;
+    const readableTitle = getReadableResourceTitle(resource, language);
+    const fileName = `${readableTitle.replace(/\s+/g, '_')}_${new Date().getTime()}`;
     
     // Create comprehensive export content
     const exportContent = {
       id: resource.id,
-      title: resource.title,
+      title: readableTitle,
       title_ar: resource.title_ar,
       description: resource.description,
       content: resource.content,
@@ -517,6 +579,15 @@ ${policy.title} (${policy.titleEn})
   };
 
   const handleUploadUpdate = async (resourceId: string, file: File) => {
+    if (!canManagePolicies) {
+      toast({
+        title: language === 'ar' ? 'غير مسموح' : 'Access denied',
+        description: language === 'ar' ? 'رفع نسخة محدثة متاح فقط للمشرفين.' : 'Only elevated roles can re-upload policy files.',
+        variant: 'destructive'
+      });
+      return;
+    }
+
     try {
       const formData = new FormData();
       formData.append('file', file);
@@ -581,6 +652,8 @@ ${policy.title} (${policy.titleEn})
     }
   };
 
+  const canManageGovernance = canManagePolicies;
+
   return (
     <div className="space-y-6" dir={dir}>
       <div className={`flex items-center justify-between ${language === 'ar' ? 'flex-row-reverse' : ''}`}>
@@ -588,24 +661,26 @@ ${policy.title} (${policy.titleEn})
           <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-100">{t('policyLibraryTitle')}</h2>
           <p className="text-gray-600 dark:text-gray-400 mt-1">{t('institutionalPolicies')}</p>
         </div>
-        <div className={`flex gap-2 ${language === 'ar' ? 'flex-row-reverse' : ''}`}>
-          <Button 
-            className={`gap-2 bg-blue-600 hover:bg-blue-700 ${language === 'ar' ? 'flex-row-reverse' : ''}`}
-            onClick={() => setIsAddModalOpen(true)}
-          >
-            <Plus className="h-4 w-4" />
-            {t('addNewPolicy')}
-          </Button>
-          
-          <Button 
-            onClick={() => setIsBulkUploadOpen(true)} 
-            variant="outline" 
-            className={`gap-2 ${language === 'ar' ? 'flex-row-reverse' : ''}`}
-          >
-            <Files className="h-4 w-4" />
-            {language === 'ar' ? 'رفع مجمع' : 'Bulk Upload'}
-          </Button>
-        </div>
+        {canManagePolicies && (
+          <div className={`flex gap-2 ${language === 'ar' ? 'flex-row-reverse' : ''}`}>
+            <Button 
+              className={`gap-2 bg-blue-600 hover:bg-blue-700 ${language === 'ar' ? 'flex-row-reverse' : ''}`}
+              onClick={() => setIsAddModalOpen(true)}
+            >
+              <Plus className="h-4 w-4" />
+              {t('addNewPolicy')}
+            </Button>
+            
+            <Button 
+              onClick={() => setIsBulkUploadOpen(true)} 
+              variant="outline" 
+              className={`gap-2 ${language === 'ar' ? 'flex-row-reverse' : ''}`}
+            >
+              <Files className="h-4 w-4" />
+              {language === 'ar' ? 'رفع مجمع' : 'Bulk Upload'}
+            </Button>
+          </div>
+        )}
       </div>
 
       {/* Search and Filters */}
@@ -736,6 +811,7 @@ ${policy.title} (${policy.titleEn})
                 )}
 
                 <div className={`flex flex-wrap gap-2 pt-2 ${language === 'ar' ? 'flex-row-reverse' : ''}`}>
+                  {canManagePolicies && (
                   <Button 
                     size="sm" 
                     variant="outline" 
@@ -745,7 +821,9 @@ ${policy.title} (${policy.titleEn})
                     <Edit className="h-3 w-3" />
                     {language === 'ar' ? 'تحرير' : 'Edit'}
                   </Button>
+                  )}
                   
+                  {canManagePolicies && (
                   <Button
                     variant="outline"
                     size="sm"
@@ -755,6 +833,7 @@ ${policy.title} (${policy.titleEn})
                     <Users className="h-3 w-3" />
                     {language === 'ar' ? 'تعيين' : 'Assign'}
                   </Button>
+                  )}
 
                   <Button
                     variant="outline"
@@ -776,6 +855,7 @@ ${policy.title} (${policy.titleEn})
                     {language === 'ar' ? 'طباعة' : 'Print'}
                   </Button>
 
+                  {canManagePolicies && (
                   <div className="relative">
                     <input
                       type="file"
@@ -799,6 +879,31 @@ ${policy.title} (${policy.titleEn})
                       {language === 'ar' ? 'رفع محدث' : 'Re-upload'}
                     </Button>
                   </div>
+                  )}
+
+                  {resource.type === 'policy' && canManageGovernance && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setGovernancePolicy(resource)}
+                      className={`gap-1 ${language === 'ar' ? 'flex-row-reverse' : ''}`}
+                    >
+                      <BookOpen className="h-3 w-3" />
+                      {language === 'ar' ? 'الحوكمة' : 'Governance'}
+                    </Button>
+                  )}
+
+                  {resource.type === 'policy' && resource.status === 'approved' && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setAttestationPolicy(resource)}
+                      className={`gap-1 ${language === 'ar' ? 'flex-row-reverse' : ''}`}
+                    >
+                      <CheckCircle className="h-3 w-3" />
+                      Attestation
+                    </Button>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -979,6 +1084,28 @@ ${policy.title} (${policy.titleEn})
           setIsBulkUploadOpen(false);
           fetchAllResources();
         }}
+      />
+
+      <PolicyGovernanceDialog
+        policy={governancePolicy}
+        open={!!governancePolicy}
+        onOpenChange={(open) => {
+          if (!open) {
+            setGovernancePolicy(null);
+          }
+        }}
+        onUpdated={fetchAllResources}
+      />
+
+      <PolicyAttestationDialog
+        policy={attestationPolicy}
+        open={!!attestationPolicy}
+        onOpenChange={(open) => {
+          if (!open) {
+            setAttestationPolicy(null);
+          }
+        }}
+        onUpdated={fetchAllResources}
       />
     </div>
   );

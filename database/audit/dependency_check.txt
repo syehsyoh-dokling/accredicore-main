@@ -1,0 +1,8 @@
+﻿=== DEPENDENCY CHECK ===
+Generated: 04/17/2026 05:50:46
+
+--- auth.users ---
+
+--- type public.app_role ---
+
+--- public.teams ---

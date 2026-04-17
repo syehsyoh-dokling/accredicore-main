@@ -1,0 +1,8 @@
+﻿=== PHASE 2 SMOKE TEST AFTER PGCRYPTO ===
+Generated: 04/17/2026 06:30:17
+
+--- validate_access_token ---
+
+--- verify_mfa_token ---
+
+--- generate_access_token ---

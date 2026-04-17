@@ -1,0 +1,14 @@
+<svg width="320" height="100" viewBox="0 0 320 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="320" height="100" fill="white"/>
+  <path d="M57 10L88 21V49C88 67.5 74.7 83.8 57 89C39.3 83.8 26 67.5 26 49V21L57 10Z" fill="#163F7A"/>
+  <path d="M57 10L88 21V49C88 67.5 74.7 83.8 57 89V10Z" fill="#14386C"/>
+  <path d="M59 29H40V34H59V29Z" fill="white"/>
+  <path d="M64 38H40V43H64V38Z" fill="white"/>
+  <path d="M58 47H40V52H58V47Z" fill="white"/>
+  <path d="M36 24L29 31L33 35L40 28V23H36V24Z" fill="white"/>
+  <path d="M40 57L51 68L71 44" stroke="white" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M82 18H88V33L82 39V18Z" fill="#F5B321"/>
+  <path d="M88 26V52C88 66.5 79.8 79.4 67.4 86.2L61.7 80.5C73.2 74.4 81 62.4 81 48.5V26H88Z" fill="#12A2A4"/>
+  <text x="102" y="40" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="700" fill="#1A4C8F">Arab</text>
+  <text x="102" y="72" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="700" fill="#118E96">Compliance Hub</text>
+</svg>

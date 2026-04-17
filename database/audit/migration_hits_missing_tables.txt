@@ -1,0 +1,19 @@
+﻿=== SEARCH RESULTS FOR MISSING TABLES IN MIGRATIONS ===
+Generated: 04/17/2026 05:48:21
+
+
+--- SEARCH: CREATE TABLE public.access_tokens ---
+
+--- SEARCH: CREATE TABLE public.mfa_configurations ---
+
+--- SEARCH: CREATE TABLE public.notifications ---
+C:\Users\Saifuddin\accredicore-main\app-source\supabase\migrations\20250712115004-784a0c36-be43-4fe3-a943-1a438828adfd.sql
+
+--- SEARCH: CREATE TABLE public.profiles ---
+C:\Users\Saifuddin\accredicore-main\app-source\supabase\migrations\20250623135003-92677312-1e53-42dd-b4be-bca1f2d72629.sql
+
+--- SEARCH: CREATE TABLE public.tasks ---
+C:\Users\Saifuddin\accredicore-main\app-source\supabase\migrations\20250625132154-04d934a1-a209-4599-b76c-6fd7e96286e7.sql
+
+--- SEARCH: CREATE TABLE public.user_roles ---
+C:\Users\Saifuddin\accredicore-main\app-source\supabase\migrations\20250623135003-92677312-1e53-42dd-b4be-bca1f2d72629.sql

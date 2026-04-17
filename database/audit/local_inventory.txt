@@ -1,0 +1,27 @@
+﻿=== LOCAL DB INVENTORY ===
+Generated: 04/17/2026 05:36:49
+Database : accredicore
+
+--- SCHEMAS ---
+
+--- TABLES (public) ---
+controls
+resources
+
+--- VIEWS (public) ---
+
+--- FUNCTIONS (public) ---
+generate_access_token
+generate_backup_codes
+generate_totp_secret
+handle_new_user
+notify_task_assignment
+notify_task_comment
+update_audit_schedules_updated_at
+update_documents_updated_at
+update_last_login
+update_updated_at_column
+validate_access_token
+verify_mfa_token
+
+--- ROLES OF INTEREST ---

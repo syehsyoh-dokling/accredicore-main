@@ -1,0 +1,175 @@
+﻿=== CONTEXT FOR generate_totp_code ===
+Generated: 04/17/2026 06:22:59
+
+
+================ FILE: C:\Users\Saifuddin\accredicore-main\app-source\supabase\migrations\20250808095314_e0735a1b-5ef3-42ee-bd8e-99b21521975b.sql ================
+        RETURN false;
+    END IF;
+
+    -- Method-specific verification
+    CASE p_method
+        WHEN 'totp' THEN
+            -- Use a hypothetical TOTP verification (would typically use an external library)
+            is_valid := (
+                p_token = public.generate_totp_code(mfa_config.totp_secret) OR
+                p_token = ANY(
+                    -- Check backup codes (one-time use)
+                    SELECT code 
+                    FROM unnest(mfa_config.backup_codes) AS code 
+                    WHERE crypt(p_token, code) = code
+                )
+            );
+
+            -- If backup code used, remove it
+            IF is_valid AND p_token = ANY(mfa_config.backup_codes) THEN
+                UPDATE public.mfa_configurations
+                SET backup_codes = array_remove(backup_codes, p_token)
+                WHERE user_id = p_user_id;
+            END IF;
+
+        WHEN 'sms' THEN
+            -- Placeholder for SMS verification logic
+            is_valid := false;
+
+        WHEN 'email' THEN
+            -- Placeholder for email verification logic
+            is_valid := false;
+
+        ELSE
+            is_valid := false;
+    END CASE;
+
+    -- Update MFA attempt tracking
+    IF is_valid THEN
+        UPDATE public.mfa_configurations
+
+-----
+
+================ FILE: C:\Users\Saifuddin\accredicore-main\app-source\supabase\migrations\20250808095431_8a069d67-2620-4d48-961a-f5d4b04afec7.sql ================
+        RETURN false;
+    END IF;
+
+    -- Method-specific verification
+    CASE p_method
+        WHEN 'totp' THEN
+            -- Use a hypothetical TOTP verification (would typically use an external library)
+            is_valid := (
+                p_token = public.generate_totp_code(mfa_config.totp_secret) OR
+                p_token = ANY(
+                    -- Check backup codes (one-time use)
+                    SELECT code 
+                    FROM unnest(mfa_config.backup_codes) AS code 
+                    WHERE crypt(p_token, code) = code
+                )
+            );
+
+            -- If backup code used, remove it
+            IF is_valid AND p_token = ANY(mfa_config.backup_codes) THEN
+                UPDATE public.mfa_configurations
+                SET backup_codes = array_remove(backup_codes, p_token)
+                WHERE user_id = p_user_id;
+            END IF;
+
+        WHEN 'sms' THEN
+            -- Placeholder for SMS verification logic
+            is_valid := false;
+
+        WHEN 'email' THEN
+            -- Placeholder for email verification logic
+            is_valid := false;
+
+        ELSE
+            is_valid := false;
+    END CASE;
+
+    -- Update MFA attempt tracking
+    IF is_valid THEN
+        UPDATE public.mfa_configurations
+
+-----
+
+================ FILE: C:\Users\Saifuddin\accredicore-main\app-source\supabase\migrations\20250808100259_d3f4ce56-3b83-47bc-93fb-35d672a71d1c.sql ================
+        RETURN false;
+    END IF;
+
+    -- Method-specific verification
+    CASE p_method
+        WHEN 'totp' THEN
+            -- Use a hypothetical TOTP verification (would typically use an external library)
+            is_valid := (
+                p_token = public.generate_totp_code(mfa_config.totp_secret) OR
+                p_token = ANY(
+                    -- Check backup codes (one-time use)
+                    SELECT code 
+                    FROM unnest(mfa_config.backup_codes) AS code 
+                    WHERE public.crypt(p_token, code) = code
+                )
+            );
+
+            -- If backup code used, remove it
+            IF is_valid AND p_token = ANY(mfa_config.backup_codes) THEN
+                UPDATE public.mfa_configurations
+                SET backup_codes = array_remove(backup_codes, p_token)
+                WHERE user_id = p_user_id;
+            END IF;
+
+        WHEN 'sms' THEN
+            -- Placeholder for SMS verification logic
+            is_valid := false;
+
+        WHEN 'email' THEN
+            -- Placeholder for email verification logic
+            is_valid := false;
+
+        ELSE
+            is_valid := false;
+    END CASE;
+
+    -- Update MFA attempt tracking
+    IF is_valid THEN
+        UPDATE public.mfa_configurations
+
+-----
+
+================ FILE: C:\Users\Saifuddin\accredicore-main\app-source\supabase\migrations\20251227201353_3e3d04f4-884b-40ed-8cc8-26137a357a71.sql ================
+        RETURN false;
+    END IF;
+
+    -- Method-specific verification
+    CASE p_method
+        WHEN 'totp' THEN
+            -- Use a hypothetical TOTP verification
+            is_valid := (
+                p_token = public.generate_totp_code(mfa_config.totp_secret) OR
+                p_token = ANY(
+                    SELECT code 
+                    FROM unnest(mfa_config.backup_codes) AS code 
+                    WHERE public.crypt(p_token, code) = code
+                )
+            );
+
+            -- If backup code used, remove it
+            IF is_valid AND p_token = ANY(mfa_config.backup_codes) THEN
+                UPDATE public.mfa_configurations
+                SET backup_codes = array_remove(backup_codes, p_token)
+                WHERE user_id = p_user_id;
+            END IF;
+
+        WHEN 'sms' THEN
+            is_valid := false;
+
+        WHEN 'email' THEN
+            is_valid := false;
+
+        ELSE
+            is_valid := false;
+    END CASE;
+
+    -- Update MFA attempt tracking
+    IF is_valid THEN
+        UPDATE public.mfa_configurations
+        SET 
+            failed_attempts = 0,
+            last_mfa_challenge_time = NOW(),
+
+-----

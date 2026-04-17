@@ -1,0 +1,24 @@
+﻿=== LOCAL MISSING TABLES ===
+Generated: 04/17/2026 05:47:05
+
+--- EXISTING TABLES ---
+controls
+resources
+
+--- REFERENCED TABLES ---
+access_tokens
+controls
+mfa_configurations
+notifications
+profiles
+resources
+tasks
+user_roles
+
+--- MISSING TABLES ---
+access_tokens
+mfa_configurations
+notifications
+profiles
+tasks
+user_roles

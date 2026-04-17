@@ -37,7 +37,8 @@ serve(async (req) => {
     );
 
     // Verify caller is authenticated
-    const { data: { user: caller }, error: userError } = await supabaseUser.auth.getUser();
+    const token = authHeader.replace('Bearer ', '');
+    const { data: { user: caller }, error: userError } = await supabaseUser.auth.getUser(token);
     if (userError || !caller) {
       console.error('User authentication failed:', userError);
       return new Response(
@@ -106,9 +107,13 @@ serve(async (req) => {
 
     console.log('Creating user:', email);
 
+    // Create a temporary password so the auth identity is fully initialized.
+    const temporaryPassword = crypto.randomUUID();
+
     // Create user account using admin API
     const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
       email: email,
+      password: temporaryPassword,
       email_confirm: true,
       user_metadata: {
         full_name: fullName
@@ -170,7 +175,8 @@ serve(async (req) => {
           email: authData.user.email,
           fullName: fullName,
           role: userRole
-        }
+        },
+        temporaryPassword
       }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );

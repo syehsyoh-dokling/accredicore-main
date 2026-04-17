@@ -23,6 +23,7 @@ import {
   FileText
 } from 'lucide-react';
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { useRealtimeTasks, Task } from "@/hooks/useRealtimeTasks";
 import { CreateTaskModal } from "./CreateTaskModal";
 import { PolicyManagementTasks } from "./PolicyManagementTasks";
@@ -30,6 +31,7 @@ import { format } from "date-fns";
 
 export function TaskManagement() {
   const { t, language, dir } = useLanguage();
+  const { userRole } = useAuth();
   const { 
     tasks, 
     comments, 
@@ -50,6 +52,7 @@ export function TaskManagement() {
   const [commentText, setCommentText] = useState('');
   const [progressValue, setProgressValue] = useState(0);
   const [progressNotes, setProgressNotes] = useState('');
+  const canManageTasks = ['system_admin', 'super_user', 'admin'].includes(userRole || '');
 
   const stats = getTaskStats();
 
@@ -154,7 +157,7 @@ export function TaskManagement() {
           <h2 className="text-3xl font-bold text-foreground">{t('taskManagement')}</h2>
           <p className="text-muted-foreground mt-1">{t('manageAssignedTasks')}</p>
         </div>
-        <CreateTaskModal onTaskCreate={createTask} />
+        {canManageTasks && <CreateTaskModal onTaskCreate={createTask} />}
       </div>
 
       {/* Stats Cards */}

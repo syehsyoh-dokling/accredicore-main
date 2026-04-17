@@ -7,12 +7,15 @@ import { Calendar, Clock, Users, CheckCircle, AlertTriangle, Plus } from 'lucide
 import { useLanguage } from "@/contexts/LanguageContext";
 import { ScheduleAuditModal } from "./ScheduleAuditModal";
 import { useAuditSchedules } from "@/hooks/useAuditSchedules";
+import { useAuth } from "@/contexts/AuthContext";
 import { format } from "date-fns";
 
 export function AuditTimeline() {
   const { t, language, dir } = useLanguage();
+  const { userRole } = useAuth();
   const { audits, loading, fetchAudits, getAuditStats } = useAuditSchedules();
   const stats = getAuditStats();
+  const canManageAudits = ['system_admin', 'super_user', 'admin'].includes(userRole || '');
 
   const getStatusBadge = (status: string) => {
     const variants = {
@@ -68,7 +71,7 @@ export function AuditTimeline() {
           <h2 className="text-3xl font-bold text-gray-900">{t('auditTimelineTitle')}</h2>
           <p className="text-gray-600 mt-1">{t('auditTimelineDesc')}</p>
         </div>
-        <ScheduleAuditModal onAuditCreated={fetchAudits} />
+        {canManageAudits && <ScheduleAuditModal onAuditCreated={fetchAudits} />}
       </div>
 
       {/* Summary Cards */}
@@ -159,9 +162,11 @@ export function AuditTimeline() {
                   <Button size="sm" variant="outline">
                     {t('viewDetails')}
                   </Button>
-                  <Button size="sm" variant="outline">
-                    {t('edit')}
-                  </Button>
+                  {canManageAudits && (
+                    <Button size="sm" variant="outline">
+                      {t('edit')}
+                    </Button>
+                  )}
                 </div>
               </div>
             ))}

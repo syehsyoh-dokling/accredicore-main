@@ -16,10 +16,12 @@ import {
 } from 'lucide-react';
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/hooks/use-toast";
 
 export function Dashboard() {
   const { t, language, dir } = useLanguage();
   const { user, userRole } = useAuth();
+  const { toast } = useToast();
 
   const stats = [
     {
@@ -94,6 +96,40 @@ export function Dashboard() {
     }
   ];
 
+  const handleExportReport = () => {
+    const lines = [
+      'Arab Compliance Hub Dashboard Report',
+      '===================================',
+      `Generated At: ${new Date().toLocaleString()}`,
+      `User: ${user?.email || 'Unknown'}`,
+      `Role: ${userRole || 'Unknown'}`,
+      '',
+      'Statistics',
+      ...stats.map((stat) => `${stat.title}: ${stat.value} (${stat.change})`),
+      '',
+      'Recent Activities',
+      ...recentActivities.map((activity) => `${activity.title} | ${activity.user} | ${activity.time}`),
+      '',
+      'Upcoming Tasks',
+      ...upcomingTasks.map((task) => `${task.title} | ${task.assignee} | ${task.dueDate} | ${task.priority}`),
+    ];
+
+    const blob = new Blob([lines.join('\n')], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = `dashboard-report-${Date.now()}.txt`;
+    document.body.appendChild(anchor);
+    anchor.click();
+    document.body.removeChild(anchor);
+    window.setTimeout(() => URL.revokeObjectURL(url), 60000);
+
+    toast({
+      title: language === 'ar' ? 'تم التصدير' : 'Report exported',
+      description: language === 'ar' ? 'تم تنزيل تقرير لوحة المتابعة' : 'Dashboard report downloaded successfully',
+    });
+  };
+
   return (
     <div className="space-y-6" dir={dir}>
       <div className={`flex items-center justify-between ${language === 'ar' ? 'flex-row-reverse' : ''}`}>
@@ -113,7 +149,10 @@ export function Dashboard() {
             </Badge>
           </div>
         </div>
-        <Button className={`gap-2 bg-blue-600 hover:bg-blue-700 ${language === 'ar' ? 'flex-row-reverse' : ''}`}>
+        <Button
+          className={`gap-2 bg-blue-600 hover:bg-blue-700 ${language === 'ar' ? 'flex-row-reverse' : ''}`}
+          onClick={handleExportReport}
+        >
           <TrendingUp className="h-4 w-4" />
           {language === 'ar' ? 'تصدير التقرير' : 'Export Report'}
         </Button>

@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
+import { format } from 'date-fns';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useAuditLogs } from '@/hooks/useAuditLogs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -46,6 +48,7 @@ export const AdminPanel = () => {
   const { language } = useLanguage();
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('dashboard');
+  const { logs, loading: auditLogsLoading } = useAuditLogs(25);
 
   const isAdmin = ['system_admin', 'super_user', 'admin'].includes(userRole || '');
 
@@ -569,29 +572,35 @@ export const AdminPanel = () => {
           <Card>
             <CardContent className="p-0">
               <div className="space-y-4 p-6">
-                {[
-                  { action: 'User Login', user: 'admin@example.com', time: '2024-01-15 10:30:00', status: 'success' },
-                  { action: 'Settings Update', user: 'manager@example.com', time: '2024-01-15 09:15:00', status: 'success' },
-                  { action: 'Failed Login', user: 'unknown@example.com', time: '2024-01-15 08:45:00', status: 'failed' },
-                  { action: 'Data Export', user: 'admin@example.com', time: '2024-01-15 08:20:00', status: 'success' },
-                  { action: 'User Creation', user: 'hr@example.com', time: '2024-01-14 16:30:00', status: 'success' }
-                ].map((log, index) => (
-                  <div key={index} className="flex items-center justify-between p-4 border rounded-lg">
-                    <div className="flex items-center space-x-4">
-                      <div className={`w-2 h-2 rounded-full ${log.status === 'success' ? 'bg-green-500' : 'bg-red-500'}`}></div>
-                      <div>
-                        <p className="font-medium">{log.action}</p>
-                        <p className="text-sm text-muted-foreground">{log.user}</p>
+                {auditLogsLoading ? (
+                  <div className="text-sm text-muted-foreground">
+                    {language === 'ar' ? 'جاري تحميل سجلات التدقيق...' : 'Loading audit logs...'}
+                  </div>
+                ) : logs.length === 0 ? (
+                  <div className="text-sm text-muted-foreground">
+                    {language === 'ar' ? 'لا توجد سجلات تدقيق بعد' : 'No audit logs recorded yet'}
+                  </div>
+                ) : (
+                  logs.map((log) => (
+                    <div key={log.id} className="flex items-center justify-between p-4 border rounded-lg">
+                      <div className="flex items-center space-x-4">
+                        <div className={`w-2 h-2 rounded-full ${log.action === 'DELETE' ? 'bg-red-500' : 'bg-green-500'}`}></div>
+                        <div>
+                          <p className="font-medium">{log.action} on {log.table_name}</p>
+                          <p className="text-sm text-muted-foreground">
+                            {log.record_id ? `Record ${log.record_id}` : 'System Event'}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm">{format(new Date(log.created_at), 'yyyy-MM-dd HH:mm:ss')}</p>
+                        <Badge variant={log.action === 'DELETE' ? 'destructive' : 'default'}>
+                          {log.action}
+                        </Badge>
                       </div>
                     </div>
-                    <div className="text-right">
-                      <p className="text-sm">{log.time}</p>
-                      <Badge variant={log.status === 'success' ? 'default' : 'destructive'}>
-                        {log.status}
-                      </Badge>
-                    </div>
-                  </div>
-                ))}
+                  ))
+                )}
               </div>
             </CardContent>
           </Card>

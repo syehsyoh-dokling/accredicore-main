@@ -23,6 +23,7 @@ export function UserManagement() {
   const [searchQuery, setSearchQuery] = React.useState('');
   const [roleFilter, setRoleFilter] = React.useState('all');
   const [statusFilter, setStatusFilter] = React.useState('all');
+  const canManageUsers = ['system_admin', 'super_user', 'admin'].includes(userRole || '');
 
   const handleEditUser = (userToEdit: any) => {
     setSelectedUser(userToEdit);
@@ -118,6 +119,24 @@ export function UserManagement() {
             </div>
           </CardContent>
         </Card>
+      </div>
+    );
+  }
+
+  if (!canManageUsers) {
+    return (
+      <div className="flex items-center justify-center h-64" dir={dir}>
+        <div className="text-center">
+          <Shield className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+          <h3 className="text-lg font-semibold text-muted-foreground">
+            {language === 'ar' ? 'ØºÙŠØ± Ù…ØµØ±Ø­ Ù„Ùƒ Ø¨Ø§Ù„ÙˆØµÙˆÙ„' : 'Access Denied'}
+          </h3>
+          <p className="text-sm text-muted-foreground">
+            {language === 'ar'
+              ? 'ÙŠØ¬Ø¨ Ø£Ù† ØªÙƒÙˆÙ† Ù…Ø¯ÙŠØ± Ù„Ù„ÙˆØµÙˆÙ„ Ù„Ù‡Ø°Ù‡ Ø§Ù„ØµÙØ­Ø©'
+              : 'You must be an admin to access this panel'}
+          </p>
+        </div>
       </div>
     );
   }

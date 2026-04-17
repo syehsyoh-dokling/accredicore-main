@@ -1,0 +1,9 @@
+﻿=== PHASE 2 SMOKE TEST AFTER auth.uid() ===
+Generated: 04/17/2026 06:33:26
+
+--- validate_access_token ---
+
+--- verify_mfa_token ---
+f
+
+--- generate_access_token ---
