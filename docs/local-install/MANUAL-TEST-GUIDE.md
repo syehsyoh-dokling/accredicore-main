@@ -14,7 +14,7 @@
 
 | Role | Email | Password |
 | --- | --- | --- |
-| System Administrator | `local-admin@accredicore.local` | `LocalAdmin123!` |
+| System Administrator | `@root` | `I'mTheR00t#` |
 | Quality Manager | `quality-manager@accredicore.local` | `QualityManager123!` |
 | Department Manager | `dept-manager@accredicore.local` | `DeptManager123!` |
 | Team Leader | `team-leader@accredicore.local` | `TeamLead123!` |
@@ -22,7 +22,7 @@
 
 ## Quick Smoke Path
 
-1. Login as `local-admin@accredicore.local`.
+1. Login as `@root`.
 2. Open `Policy Library`.
 3. Confirm approved policies show both `Governance` and `Attestation` actions.
 4. Open the bell icon in the header and confirm notifications are visible.
@@ -34,7 +34,7 @@
 
 ### 1. System Administrator
 
-1. Login with `local-admin@accredicore.local`.
+1. Login with `@root`.
 2. Open `Policy Library`.
 3. Pick an approved policy and click `Attestation`.
 4. Assign acknowledgment to `staff-user@accredicore.local` with a due date and instructions.
