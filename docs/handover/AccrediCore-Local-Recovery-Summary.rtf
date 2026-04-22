@@ -1,0 +1,186 @@
+{\rtf1\ansi\deff0
+{\fonttbl{\f0 Calibri;}{\f1 Consolas;}}
+\fs24
+\b AccrediCore Main Local Recovery Summary\par
+\b0
+This document summarizes what was missing after the Supabase export/import process and what was added or repaired so the project can run locally as a customer-managed deployment.\par
+\par
+\b 1. Initial Problem After Export From Supabase\par
+\b0
+When the application source was moved into the local repository, the frontend code was present but the full local runtime parity was not. The main gaps were:\par
+\par
+\bullet \tab The frontend still depended on a hardcoded Supabase cloud project instead of a configurable local backend.\par
+\bullet \tab The local PostgreSQL database did not contain the full set of tables used by the frontend.\par
+\bullet \tab Several RPC/database functions used by the UI were missing locally.\par
+\bullet \tab Storage, auth behavior, edge functions, and authorization rules were incomplete or inconsistent in the local environment.\par
+\bullet \tab Governance features such as approval chain, audit trail, version archive, notifications, and attestation were not fully represented in the local stack.\par
+\bullet \tab Customer-ready local packaging was incomplete.\par
+\par
+\b 2. What Commonly Gets Lost When Moving From Supabase Cloud To Local\par
+\b0
+The following categories are the main items that were effectively missing or incomplete and had to be rebuilt or verified:\par
+\par
+\bullet \tab Table coverage parity between frontend queries and the local database.\par
+\bullet \tab Custom RPC functions referenced by hooks, contexts, and pages.\par
+\bullet \tab Row Level Security and role-based access rules.\par
+\bullet \tab Storage bucket setup and read/write policy behavior.\par
+\bullet \tab Edge functions such as create-user and update-user-password.\par
+\bullet \tab Auth-related compatibility objects needed for local operation.\par
+\bullet \tab Seed users and role records for realistic smoke/manual testing.\par
+\bullet \tab Governance objects: approval requests, versioning, audit logs, notifications, policy attestations.\par
+\bullet \tab Documentation and setup scripts required for customer-local deployment.\par
+\par
+\b 3. Main Recovery Work Completed\par
+\b0
+\par
+\b 3.1 Frontend Environment Decoupling\par
+\b0
+The frontend client was changed so it no longer depends on a hardcoded cloud URL/key and can be pointed to local Supabase using environment variables.\par
+\par
+Relevant area:\par
+{\f1 app-source/src/integrations/supabase/client.ts}\par
+\par
+\b 3.2 Database Contract Recovery\par
+\b0
+The local database was rebuilt incrementally through staged SQL patches and a final schema dump. This restored the frontend-facing contract that had been missing locally.\par
+\par
+Key files:\par
+{\f1 database/bootstrap/008_phase3_frontend_contract_patch.sql}\par
+{\f1 database/bootstrap/009_supabase_local_contract_patch.sql}\par
+{\f1 database/bootstrap/local_full_schema_dump.sql}\par
+\par
+Tables/functions recovered or validated include the main frontend dependencies such as:\par
+\par
+\bullet \tab profiles\par
+\bullet \tab user_roles\par
+\bullet \tab teams\par
+\bullet \tab team_members\par
+\bullet \tab documents\par
+\bullet \tab policies\par
+\bullet \tab policy_templates\par
+\bullet \tab task_comments\par
+\bullet \tab task_progress\par
+\bullet \tab project_quality_plan\par
+\bullet \tab audit_schedules\par
+\bullet \tab incidents and related workflow objects\par
+\par
+Critical RPCs restored/verified locally include:\par
+\par
+\bullet \tab get_current_user_role\par
+\bullet \tab get_department_compliance_summary\par
+\bullet \tab update_audit_progress\par
+\par
+\b 3.3 Authorization Hardening\par
+\b0
+Local authorization was tightened so the system behaves more like the intended production model. This included RLS-oriented restrictions and UI behavior alignment.\par
+\par
+Key file:\par
+{\f1 database/bootstrap/010_supabase_local_authorization_patch.sql}\par
+\par
+Examples of results:\par
+\par
+\bullet \tab Staff users can no longer create policies, teams, or restricted management records.\par
+\bullet \tab Staff UI was changed so management actions are hidden or denied where appropriate.\par
+\bullet \tab Sensitive modules such as User Management and Team Management now show Access Denied for staff.\par
+\bullet \tab Policy Library actions shown to staff were reduced to read-oriented actions only.\par
+\par
+\b 3.4 Governance and Compliance Workflow Recovery\par
+\b0
+The local database and UI were extended to support governance workflows that were missing or incomplete.\par
+\par
+Key files:\par
+{\f1 database/bootstrap/011_policy_governance_patch.sql}\par
+{\f1 database/bootstrap/012_notification_attestation_patch.sql}\par
+\par
+Features added/restored:\par
+\par
+\bullet \tab Policy approval chain\par
+\bullet \tab Policy version archive/history\par
+\bullet \tab Audit logs backed by real database data\par
+\bullet \tab In-app notifications\par
+\bullet \tab Staff acknowledgment/attestation\par
+\par
+Approval sequence implemented:\par
+\par
+\bullet \tab Team Leader / Super User review\par
+\bullet \tab Department Manager approval\par
+\bullet \tab System Administrator / Executive approval\par
+\par
+\b 3.5 Edge Functions and Local Supabase Coverage\par
+\b0
+The repository already contained Supabase migrations and edge function source, but local parity required additional validation and fixes.\par
+\par
+Relevant local sources:\par
+{\f1 app-source/supabase/config.toml}\par
+{\f1 app-source/supabase/migrations/...}\par
+{\f1 app-source/supabase/functions/create-user/index.ts}\par
+{\f1 app-source/supabase/functions/update-user-password/index.ts}\par
+\par
+This was important because local customers do not need the internal Supabase platform source code, but they do need the application-owned Supabase assets: migrations, config, functions, and schema patches.\par
+\par
+\b 3.6 Local API and Audit Support\par
+\b0
+A lightweight local Express API is included for health checks and selected local PostgreSQL endpoints.\par
+\par
+Relevant area:\par
+{\f1 local-api/server.js}\par
+{\f1 local-api/scripts/audit-local-db.js}\par
+\par
+This was kept as a companion layer for local validation, DB audits, and selected endpoints.\par
+\par
+\b 3.7 Local Setup, Start, and Validation Scripts\par
+\b0
+Customer-local scripts were added or organized so a customer IT team can bring the environment up more consistently.\par
+\par
+Relevant files:\par
+{\f1 scripts/setup/setup-env-win.ps1}\par
+{\f1 scripts/start/start-win.ps1}\par
+{\f1 scripts/health/check-app.ps1}\par
+{\f1 scripts/bootstrap/bootstrap-win.ps1}\par
+{\f1 docs/local-install/README.md}\par
+{\f1 docs/local-install/MANUAL-TEST-GUIDE.md}\par
+\par
+\b 4. Current Local Capability Achieved\par
+\b0
+After the recovery work, the local deployment is capable of the following:\par
+\par
+\bullet \tab Frontend can build and run locally.\par
+\bullet \tab Local Supabase-compatible schema is available in bootstrap assets.\par
+\bullet \tab Core frontend modules can operate against the local backend contract.\par
+\bullet \tab Auth, role checks, storage access, and major workflows have been smoke tested.\par
+\bullet \tab Role-based manual testing can be performed with seeded test users.\par
+\bullet \tab Governance workflows now exist locally instead of being cloud-only assumptions.\par
+\bullet \tab Customer delivery package structure is documented.\par
+\par
+\b 5. Key Risks / What Was Not Fully Solved By Schema Export Alone\par
+\b0
+Schema export alone was not enough to produce a usable local product. The following also had to be explicitly addressed:\par
+\par
+\bullet \tab Frontend environment targeting.\par
+\bullet \tab Seed user strategy.\par
+\bullet \tab Authorization and UI permission consistency.\par
+\bullet \tab Function behavior and edge function authorization.\par
+\bullet \tab Governance workflow tables plus UI integration.\par
+\bullet \tab Installer and customer-delivery packaging.\par
+\par
+\b 6. Important Reference Files For Other Programmers\par
+\b0
+\par
+\bullet \tab Local deployment runbook: {\f1 docs/local-install/README.md}\par
+\bullet \tab Manual testing guide: {\f1 docs/local-install/MANUAL-TEST-GUIDE.md}\par
+\bullet \tab Database bootstrap notes: {\f1 database/bootstrap/README.md}\par
+\bullet \tab Full schema snapshot: {\f1 database/bootstrap/local_full_schema_dump.sql}\par
+\bullet \tab Frontend contract patch: {\f1 database/bootstrap/009_supabase_local_contract_patch.sql}\par
+\bullet \tab Authorization patch: {\f1 database/bootstrap/010_supabase_local_authorization_patch.sql}\par
+\bullet \tab Governance patch: {\f1 database/bootstrap/011_policy_governance_patch.sql}\par
+\bullet \tab Notification and attestation patch: {\f1 database/bootstrap/012_notification_attestation_patch.sql}\par
+\bullet \tab Local API audit script: {\f1 local-api/scripts/audit-local-db.js}\par
+\par
+\b 7. Practical Conclusion\par
+\b0
+The repository did not become locally runnable by export alone. It became locally runnable because the missing Supabase-dependent pieces were recovered through staged schema patches, function parity work, authorization hardening, local setup scripts, governance extensions, and packaging/documentation for customer-managed deployment.\par
+\par
+\b 8. Recommended Onboarding Note For Future Programmers\par
+\b0
+If a future developer needs to rebuild or troubleshoot the local stack, they should not assume that the raw Supabase export is sufficient. They should start from the local runbook, apply the bootstrap SQL assets in order, verify frontend contract coverage, validate role behavior, and use the schema dump only as a reference snapshot, not as the only recovery mechanism.\par
+}

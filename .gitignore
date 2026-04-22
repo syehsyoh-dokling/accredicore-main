@@ -9,6 +9,8 @@ app-source/supabase/.branches/
 app-source/supabase/.temp/
 app-source/dist/
 coverage/
+test-results/
+**/test-results/
 *.log
 Thumbs.db
 .DS_Store
